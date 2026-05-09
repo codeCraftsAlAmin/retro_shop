@@ -7,19 +7,32 @@ datasource db {
   provider = "postgresql"
 }
 
+// user model
 model User {
-  id            String    @id
+  id            String     @id
   name          String
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean    @default(false)
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  role          Role       @default(CUSTOMER)
+  phone         String?
+  gender        Gender     @default(OTHER)
+  status        UserStatus @default(ACTIVE)
+  isDeleted     Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  deletedAt     DateTime?
   sessions      Session[]
   accounts      Account[]
 
+  // relations
+  customers Customer[]
+  sellers   Seller[]
+  admins    Admin[]
+
   @@unique([email])
-  @@map("user")
+  @@index([email, id])
+  @@map("users")
 }
 
 model Session {
@@ -68,4 +81,94 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+// admin model
+model Admin {
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  profilePhoto  String?
+  phone         String?
+  gender        Gender    @default(OTHER)
+  address       String?
+  isDeleted     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // relation
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([userId, email])
+  @@index([email])
+  @@map("admins")
+}
+
+// customer model
+model Customer {
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  profilePhoto  String?
+  phone         String?
+  gender        Gender    @default(OTHER)
+  address       String?
+  isDeleted     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // relation
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([userId, email])
+  @@index([email])
+  @@map("customers")
+}
+
+// seller model
+model Seller {
+  id            String    @id @default(uuid())
+  name          String
+  email         String
+  emailVerified Boolean   @default(false)
+  profilePhoto  String?
+  phone         String?
+  gender        Gender    @default(OTHER)
+  address       String?
+  isDeleted     Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
+
+  // relation
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String
+
+  @@unique([userId, email])
+  @@index([email])
+  @@map("sellers")
+}
+
+// enums
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  SELLER
+}
+
+enum UserStatus {
+  ACTIVE
+  BANNED
 }
