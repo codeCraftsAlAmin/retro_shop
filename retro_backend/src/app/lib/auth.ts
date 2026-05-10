@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma";
 import { prisma } from "./prisma";
 import { envVars } from "../config/env";
 import { Gender, Role, UserStatus } from "../../generated/prisma/enums";
+import { bearer } from "better-auth/plugins";
 
 export const auth = betterAuth({
   baseURL: envVars.BETTER_AUTH_URL,
@@ -54,6 +55,19 @@ export const auth = betterAuth({
         required: false,
         defaultValue: null,
       },
+    },
+  },
+
+  // plugins helps to add extra features such as use Bearer token
+  plugins: [bearer()],
+
+  // better-auth session configuration
+  session: {
+    expiresIn: 60 * 60 * 24, // 1d
+    updatedAt: 60 * 60 * 24, // 1d
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24, // 1d
     },
   },
 });

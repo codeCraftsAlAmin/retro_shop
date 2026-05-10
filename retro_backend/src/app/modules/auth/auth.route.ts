@@ -11,4 +11,14 @@ router.post(
   authController.signUpController,
 );
 
+// sign-in route
+router.post(
+  "/sign-in/email",
+  validateRequeset(authValidation.signInEmailSchema),
+  authController.signInController,
+);
+
+// sign-out route
+router.post("/sign-out", authController.signOutController);
+
 export const authRouter: Router = router;

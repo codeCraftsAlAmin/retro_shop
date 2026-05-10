@@ -4,6 +4,7 @@ import globalErrorHandler from "./app/middleware/globalError";
 import { authRouter } from "./app/modules/auth/auth.route";
 import { envVars } from "./app/config/env";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app: Application = express();
 
@@ -24,6 +25,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use(cookieParser());
 
 // auth route
 app.use("/api/auth", authRouter);

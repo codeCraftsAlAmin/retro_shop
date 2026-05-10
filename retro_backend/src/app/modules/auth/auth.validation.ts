@@ -10,6 +10,13 @@ const signUpEmailSchema = z.object({
     .min(6, "Password must be at least 6 characters long"),
 });
 
+const signInEmailSchema = z.object({
+  email: z.email({ message: "Invalid email" }),
+  password: z
+    .string({ message: "Password is required" })
+    .min(6, "Password must be at least 6 characters long"),
+});
+
 const changePasswordSchema = z.object({
   oldPassword: z
     .string({ message: "Old password is required" })
@@ -21,5 +28,6 @@ const changePasswordSchema = z.object({
 
 export const authValidation = {
   signUpEmailSchema,
+  signInEmailSchema,
   changePasswordSchema,
 };
