@@ -11,6 +11,9 @@ router.post(
   authController.signUpController,
 );
 
+// verify-email
+router.post("/email-otp/verify-email", authController.verifyEmailController);
+
 // sign-in route
 router.post(
   "/sign-in/email",
@@ -20,5 +23,14 @@ router.post(
 
 // sign-out route
 router.post("/sign-out", authController.signOutController);
+
+// google login route
+router.get("/login/google", authController.googleLoginController);
+
+// success login
+router.get("/google/success", authController.googleSuccessController);
+
+// google login error
+router.get("/oauth/error", authController.googleErrorController);
 
 export const authRouter: Router = router;

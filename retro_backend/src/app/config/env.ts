@@ -11,6 +11,10 @@ interface envConfig {
   CLOUDINARY_KEY_NAME: string;
   CLOUDINARY_API_KEY: string;
   CLOUDINARY_SEC: string;
+  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_SECRET: string;
+  SMTP_PASS: string;
+  SMTP_USER: string;
 }
 
 const envVariables = (): envConfig => {
@@ -24,6 +28,10 @@ const envVariables = (): envConfig => {
     "CLOUDINARY_KEY_NAME",
     "CLOUDINARY_API_KEY",
     "CLOUDINARY_SEC",
+    "GOOGLE_CLIENT_ID",
+    "GOOGLE_CLIENT_SECRET",
+    "SMTP_PASS",
+    "SMTP_USER",
   ];
 
   requiredVariables.forEach((v) => {
@@ -42,6 +50,10 @@ const envVariables = (): envConfig => {
     CLOUDINARY_KEY_NAME: process.env.CLOUDINARY_KEY_NAME as string,
     CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY as string,
     CLOUDINARY_SEC: process.env.CLOUDINARY_SEC as string,
+    GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID as string,
+    GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
+    SMTP_PASS: process.env.SMTP_PASS as string,
+    SMTP_USER: process.env.SMTP_USER as string,
   };
 };
 

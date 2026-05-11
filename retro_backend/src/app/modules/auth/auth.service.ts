@@ -1,4 +1,4 @@
-import { ISignInEmail, ISignUpEmail } from "./auth.interface";
+import { ISignInEmail, ISignUpEmail, IVerifyEmail } from "./auth.interface";
 import AppError from "../../middleware/appError";
 import status from "http-status";
 import { prisma } from "../../lib/prisma";
@@ -55,6 +55,23 @@ const signUpService = async (payload: ISignUpEmail) => {
   }
 };
 
+const verifyEmailService = async (payload: IVerifyEmail) => {
+  const { email, otp } = payload;
+
+  try {
+    const result = await auth.api.verifyEmailOTP({
+      body: {
+        email,
+        otp,
+      },
+    });
+
+    return result;
+  } catch (error) {
+    throw new AppError(status.INTERNAL_SERVER_ERROR, "Failed to verify email");
+  }
+};
+
 const signInService = async (payload: ISignInEmail) => {
   const { email, password } = payload;
 
@@ -105,8 +122,48 @@ const signOutService = async (sessionToken: string) => {
   return result;
 };
 
+const googleSuccessService = async (session: Record<string, any>) => {
+  try {
+    return await prisma.$transaction(async (tx) => {
+      // find customer
+      const isCustomer = await tx.customer.findUnique({
+        where: {
+          email: session.user.email,
+        },
+      });
+
+      // create customer profile
+      if (!isCustomer) {
+        await tx.customer.create({
+          data: {
+            userId: session.user.id,
+            name: session.user.name,
+            email: session.user.email,
+          },
+        });
+      }
+      return session.user;
+    });
+  } catch (error) {
+    await auth.api.revokeSession({
+      body: {
+        token: session.session.token,
+      },
+      headers: {
+        Authorization: `Bearer ${session.session.token}`,
+      },
+    });
+    throw new AppError(
+      status.INTERNAL_SERVER_ERROR,
+      "Profile creation failed. Please try again.",
+    );
+  }
+};
+
 export const authService = {
   signUpService,
   signInService,
   signOutService,
+  googleSuccessService,
+  verifyEmailService,
 };

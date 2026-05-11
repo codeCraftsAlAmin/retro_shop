@@ -87,7 +87,7 @@ model Verification {
 model Admin {
   id            String    @id @default(uuid())
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
   profilePhoto  String?
   phone         String?
@@ -111,8 +111,7 @@ model Admin {
 model Customer {
   id            String    @id @default(uuid())
   name          String
-  email         String
-  emailVerified Boolean   @default(false)
+  email         String    @unique
   profilePhoto  String?
   phone         String?
   gender        Gender    @default(OTHER)
@@ -135,7 +134,7 @@ model Customer {
 model Seller {
   id            String    @id @default(uuid())
   name          String
-  email         String
+  email         String    @unique
   emailVerified Boolean   @default(false)
   profilePhoto  String?
   phone         String?
