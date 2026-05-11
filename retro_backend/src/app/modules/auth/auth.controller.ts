@@ -145,6 +145,53 @@ const googleErrorController = catchAsync(
   },
 );
 
+const changePasswordController = catchAsync(
+  async (req: Request, res: Response) => {
+    // get session token from cookie
+    const sessionToken = req.cookies["better-auth.session_token"];
+
+    const result = await authService.changePasswordService(
+      req.body,
+      sessionToken,
+    );
+
+    // set token to cookie
+    tokenHelpers.setBetterAuthSessionCookie(res, result.token as string);
+
+    sendResponse(res, {
+      statusCode: status.OK,
+      ok: true,
+      message: "Password changed successfully",
+    });
+  },
+);
+
+const forgetPasswordRequestController = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await authService.forgetPasswordRequestService(req.body);
+
+    sendResponse(res, {
+      statusCode: status.OK,
+      ok: true,
+      message:
+        "Password reset request sent successfully. Please check your email for the verification code.",
+      data: result,
+    });
+  },
+);
+
+const resetPasswordController = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await authService.resetPasswordService(req.body);
+
+    sendResponse(res, {
+      statusCode: status.OK,
+      ok: true,
+      message: "Password reset successfully",
+    });
+  },
+);
+
 export const authController = {
   signUpController,
   signInController,
@@ -153,4 +200,7 @@ export const authController = {
   googleSuccessController,
   googleErrorController,
   verifyEmailController,
+  changePasswordController,
+  forgetPasswordRequestController,
+  resetPasswordController,
 };

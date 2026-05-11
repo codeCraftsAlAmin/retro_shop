@@ -33,4 +33,23 @@ router.get("/google/success", authController.googleSuccessController);
 // google login error
 router.get("/oauth/error", authController.googleErrorController);
 
+// change password route
+router.post(
+  "/change-password",
+  validateRequeset(authValidation.changePasswordSchema),
+  authController.changePasswordController,
+);
+
+// forget-password request route
+router.post(
+  "/email-otp/request-password-reset",
+  authController.forgetPasswordRequestController,
+);
+
+// reset password route
+router.post(
+  "/email-otp/reset-password",
+  authController.resetPasswordController,
+);
+
 export const authRouter: Router = router;

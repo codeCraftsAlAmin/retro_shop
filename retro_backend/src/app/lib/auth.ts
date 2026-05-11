@@ -88,6 +88,7 @@ export const auth = betterAuth({
     emailOTP({
       overrideDefaultEmailVerification: true,
       async sendVerificationOTP({ email, otp, type }) {
+        // email verification
         if (type === "email-verification") {
           // find user
           const user = await prisma.user.findUnique({
@@ -108,6 +109,32 @@ export const auth = betterAuth({
             sendEmail({
               to: email,
               subject: "Email Verification",
+              templateName: "otp",
+              templateData: {
+                name: user.name,
+                otp,
+              },
+            }),
+          );
+        }
+
+        // forget pass req
+        if (type === "forget-password") {
+          //find user
+          const user = await prisma.user.findUnique({
+            where: {
+              email,
+            },
+          });
+
+          if (!user) {
+            throw new AppError(status.NOT_FOUND, "User not found");
+          }
+          // console.log("Sending email to forget password", email);
+          waitUntil(
+            sendEmail({
+              to: email,
+              subject: "Forget Password",
               templateName: "otp",
               templateData: {
                 name: user.name,
