@@ -249,6 +249,9 @@ importers:
       pg:
         specifier: ^8.20.0
         version: 8.20.0
+      qs:
+        specifier: ^6.15.1
+        version: 6.15.1
       uuid:
         specifier: ^14.0.0
         version: 14.0.0
@@ -286,6 +289,9 @@ importers:
       '@types/pg':
         specifier: ^8.20.0
         version: 8.20.0
+      '@types/qs':
+        specifier: ^6.15.1
+        version: 6.15.1
       dotenv:
         specifier: ^17.4.2
         version: 17.4.2

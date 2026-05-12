@@ -7,8 +7,16 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import { toNodeHandler } from "better-auth/node";
 import { auth } from "./app/lib/auth";
+import { userRouter } from "./app/modules/users/user.route";
+import qs from "qs";
+import { customerRouter } from "./app/modules/customers/customer.route";
+import { sellerRouter } from "./app/modules/serllers/seller.route";
+import { adminRouter } from "./app/modules/admins/admin.route";
 
 const app: Application = express();
+
+// for query builder
+app.set("query parser", (str: string) => qs.parse(str));
 
 app.use(express.urlencoded({ extended: true }));
 
@@ -35,6 +43,18 @@ app.use("/api/auth", authRouter);
 
 // social login route
 app.use("/api/auth", toNodeHandler(auth));
+
+// user route
+app.use("/api/users", userRouter);
+
+// customer route
+app.use("/api/customers", customerRouter);
+
+// seller route
+app.use("/api/sellers", sellerRouter);
+
+// admin route
+app.use("/api/admins", adminRouter);
 
 // base route
 app.get("/", (req: Request, res: Response) => {
