@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender } from "../../../generated/prisma/enums";
+import { Gender, Role } from "../../../generated/prisma/enums";
 
 const updateMyProfileValidation = z.object({
   name: z
@@ -15,6 +15,11 @@ const updateMyProfileValidation = z.object({
   gender: z.enum([Gender.MALE, Gender.FEMALE, Gender.OTHER]).optional(),
 });
 
+const updateUserRoleValidation = z.object({
+  role: z.enum([Role.ADMIN, Role.CUSTOMER, Role.SELLER]),
+});
+
 export const adminValidation = {
   updateMyProfileValidation,
+  updateUserRoleValidation,
 };

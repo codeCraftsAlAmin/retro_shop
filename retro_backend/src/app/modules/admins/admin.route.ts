@@ -17,4 +17,12 @@ router.put(
   adminController.updateMyProfileController,
 );
 
+// update user role
+router.put(
+  "/update-user-role/:id",
+  checkAuth(Role.ADMIN),
+  validateRequeset(adminValidation.updateUserRoleValidation),
+  adminController.updateUserRoleController,
+);
+
 export const adminRouter: Router = router;
