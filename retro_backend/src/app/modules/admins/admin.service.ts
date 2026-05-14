@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma";
 import AppError from "../../middleware/appError";
 import { IRequestUserInterface } from "../../interfaces/requestUserInterface";
 import { IUpdateProfile } from "../../interfaces/updateProfile.interface";
-import { Role } from "../../../generated/prisma/enums";
+import { Category, Role } from "../../../generated/prisma/enums";
 
 const updateMyProfileService = async (
   user: IRequestUserInterface,

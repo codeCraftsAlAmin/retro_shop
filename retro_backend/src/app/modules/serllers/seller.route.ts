@@ -17,4 +17,13 @@ router.put(
   sellerController.updateMyProfileController,
 );
 
+// create product route
+router.post(
+  "/create-product",
+  multerUpload.array("images", 4),
+  checkAuth(Role.SELLER),
+  validateRequeset(sellerValidation.createProductValidation),
+  sellerController.createProductController,
+);
+
 export const sellerRouter: Router = router;

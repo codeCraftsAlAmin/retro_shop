@@ -17,7 +17,7 @@ router.put(
   adminController.updateMyProfileController,
 );
 
-// update user role
+// update user role route
 router.put(
   "/update-user-role/:id",
   checkAuth(Role.ADMIN),

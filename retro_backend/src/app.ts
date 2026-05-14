@@ -12,6 +12,7 @@ import qs from "qs";
 import { customerRouter } from "./app/modules/customers/customer.route";
 import { sellerRouter } from "./app/modules/serllers/seller.route";
 import { adminRouter } from "./app/modules/admins/admin.route";
+import { categoryRouter } from "./app/modules/categories/category.route";
 
 const app: Application = express();
 
@@ -55,6 +56,9 @@ app.use("/api/sellers", sellerRouter);
 
 // admin route
 app.use("/api/admins", adminRouter);
+
+// category route
+app.use("/api/categories", categoryRouter);
 
 // base route
 app.get("/", (req: Request, res: Response) => {

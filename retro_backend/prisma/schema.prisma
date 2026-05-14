@@ -109,17 +109,17 @@ model Admin {
 
 // customer model
 model Customer {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  profilePhoto  String?
-  phone         String?
-  gender        Gender    @default(OTHER)
-  address       String?
-  isDeleted     Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  profilePhoto String?
+  phone        String?
+  gender       Gender    @default(OTHER)
+  address      String?
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   // relation
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -146,12 +146,69 @@ model Seller {
   deletedAt     DateTime?
 
   // relation
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId String
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId   String
+  products Product[]
 
   @@unique([userId, email])
   @@index([email])
   @@map("sellers")
+}
+
+// products model
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  teamName    String
+  year        String
+  brand       String
+  description String?
+  images      String[]
+  isDeleted   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  // relations
+  variants ProductVariant[]
+
+  category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String
+
+  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  sellerId String
+
+  @@map("products")
+}
+
+// product category model
+model ProductCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  product Product[]
+
+  @@map("categories")
+}
+
+// product varitent model
+model ProductVariant {
+  id        String   @id @default(uuid())
+  size      Size     @default(S)
+  price     Float    @default(0)
+  stock     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+
+  @@unique([productId, size])
+  @@map("varitents")
 }
 
 // enums
@@ -170,4 +227,12 @@ enum Role {
 enum UserStatus {
   ACTIVE
   BANNED
+}
+
+enum Size {
+  S
+  M
+  L
+  XL
+  XXL
 }

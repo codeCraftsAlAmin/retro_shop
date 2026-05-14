@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { Gender, Role } from "../../../generated/prisma/enums";
+import { Category, Gender, Role } from "../../../generated/prisma/enums";
 
 const updateMyProfileValidation = z.object({
   name: z
