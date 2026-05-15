@@ -6,9 +6,11 @@ import { categoryService } from "./category.service";
 
 const createCategoryController = catchAsync(
   async (req: Request, res: Response) => {
-    const { name } = req.body;
+    const { categoryName } = req.body;
 
-    const result = await categoryService.createCategoryService(name as string);
+    const result = await categoryService.createCategoryService(
+      categoryName as string,
+    );
 
     sendResponse(res, {
       ok: true,
@@ -48,10 +50,10 @@ const deleteCategoryController = catchAsync(
 const updateCategoryController = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { name } = req.body;
+    const { categoryName } = req.body;
     const result = await categoryService.updateCategoryService(
       id as string,
-      name as string,
+      categoryName as string,
     );
 
     sendResponse(res, {

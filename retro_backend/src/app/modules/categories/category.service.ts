@@ -2,11 +2,11 @@ import status from "http-status";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../middleware/appError";
 
-const createCategoryService = async (name: string) => {
+const createCategoryService = async (categoryName: string) => {
   // check category already exists
   const categoryExists = await prisma.productCategory.findFirst({
     where: {
-      name,
+      categoryName,
     },
   });
 
@@ -16,7 +16,7 @@ const createCategoryService = async (name: string) => {
 
   const result = await prisma.productCategory.create({
     data: {
-      name: name,
+      categoryName,
     },
   });
 
@@ -37,7 +37,7 @@ const deleteCategoryService = async (id: string) => {
   });
 };
 
-const updateCategoryService = async (id: string, name: string) => {
+const updateCategoryService = async (id: string, categoryName: string) => {
   // check category already exists
   const categoryExists = await prisma.productCategory.findFirst({
     where: {
@@ -51,7 +51,7 @@ const updateCategoryService = async (id: string, name: string) => {
 
   const nameAlreadyTaken = await prisma.productCategory.findFirst({
     where: {
-      name,
+      categoryName: categoryName,
       id: { not: id },
     },
   });
@@ -68,7 +68,7 @@ const updateCategoryService = async (id: string, name: string) => {
       id,
     },
     data: {
-      name,
+      categoryName: categoryName,
     },
   });
 

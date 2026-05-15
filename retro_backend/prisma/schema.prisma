@@ -164,6 +164,7 @@ model Product {
   brand       String
   description String?
   images      String[]
+  isFeatured  Boolean   @default(false)
   isDeleted   Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -184,7 +185,7 @@ model Product {
 // product category model
 model ProductCategory {
   id        String   @id @default(uuid())
-  name      String   @unique
+  categoryName      String   @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

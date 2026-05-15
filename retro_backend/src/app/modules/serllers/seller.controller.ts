@@ -23,23 +23,6 @@ const updateMyProfileController = catchAsync(
   },
 );
 
-const createProductController = catchAsync(
-  async (req: Request, res: Response) => {
-    const user = req.user;
-
-    const payload = req.body;
-    const result = await sellerService.createProductService(user!, payload);
-
-    sendResponse(res, {
-      ok: true,
-      statusCode: status.OK,
-      message: "Product created successfully",
-      data: result,
-    });
-  },
-);
-
 export const sellerController = {
   updateMyProfileController,
-  createProductController,
 };

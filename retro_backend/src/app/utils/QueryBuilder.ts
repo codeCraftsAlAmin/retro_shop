@@ -185,12 +185,8 @@ export class QueryBuilder<
           const [relation, nestedRelation, nestedField] = parts;
 
           if (!queryWhere[relation]) {
-            queryWhere[relation] = {
-              some: {},
-            };
-            countQueryWhere[relation] = {
-              some: {},
-            };
+            queryWhere[relation] = {};
+            countQueryWhere[relation] = {};
           }
 
           const queryRelation = queryWhere[relation] as Record<string, unknown>;
@@ -199,27 +195,16 @@ export class QueryBuilder<
             unknown
           >;
 
-          if (!queryRelation.some) {
-            queryRelation.some = {};
-            countQueryRelation.some = {};
+          if (!queryRelation[nestedRelation]) {
+            queryRelation[nestedRelation] = {};
+            countQueryRelation[nestedRelation] = {};
           }
 
-          const querySome = queryRelation.some as Record<string, unknown>;
-          const countQuerySome = countQueryRelation.some as Record<
+          const queryNestedRelation = queryRelation[nestedRelation] as Record<
             string,
             unknown
           >;
-
-          if (!querySome[nestedRelation]) {
-            querySome[nestedRelation] = {};
-            countQuerySome[nestedRelation] = {};
-          }
-
-          const queryNestedRelation = querySome[nestedRelation] as Record<
-            string,
-            unknown
-          >;
-          const countQueryNestedRelation = countQuerySome[
+          const countQueryNestedRelation = countQueryRelation[
             nestedRelation
           ] as Record<string, unknown>;
 
@@ -456,6 +441,12 @@ export class QueryBuilder<
       return { in: value.map((item) => this.parseFilterValue(item)) };
     }
 
+    if (typeof value === "object" && value !== null) {
+      return this.parseRangeFilterValue(
+        value as Record<string, string | number>,
+      );
+    }
+
     return value;
   }
 
@@ -477,6 +468,7 @@ export class QueryBuilder<
       switch (operator) {
         case "lt":
         case "lte":
+        case "lse": // support for lse alias
         case "gt":
         case "gte":
         case "equals":
@@ -484,7 +476,7 @@ export class QueryBuilder<
         case "contains":
         case "startsWith":
         case "endsWith":
-          rangeQuery[operator] = parsedValue;
+          rangeQuery[operator === "lse" ? "lte" : operator] = parsedValue;
           break;
 
         case "in":
