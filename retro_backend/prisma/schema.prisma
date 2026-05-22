@@ -85,18 +85,17 @@ model Verification {
 
 // admin model
 model Admin {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  profilePhoto  String?
-  phone         String?
-  gender        Gender    @default(OTHER)
-  address       String?
-  isDeleted     Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  profilePhoto String?
+  phone        String?
+  gender       Gender    @default(OTHER)
+  address      String?
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   // relation
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -122,8 +121,10 @@ model Customer {
   deletedAt    DateTime?
 
   // relation
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId String
+  orders Order[]
+  carts  Cart[]
 
   @@unique([userId, email])
   @@index([email])
@@ -132,18 +133,17 @@ model Customer {
 
 // seller model
 model Seller {
-  id            String    @id @default(uuid())
-  name          String
-  email         String    @unique
-  emailVerified Boolean   @default(false)
-  profilePhoto  String?
-  phone         String?
-  gender        Gender    @default(OTHER)
-  address       String?
-  isDeleted     Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime?
+  id           String    @id @default(uuid())
+  name         String
+  email        String    @unique
+  profilePhoto String?
+  phone        String?
+  gender       Gender    @default(OTHER)
+  address      String?
+  isDeleted    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   // relation
   user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -179,15 +179,17 @@ model Product {
   seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   sellerId String
 
+  @@index([sellerId])
+  @@index([categoryId])
   @@map("products")
 }
 
 // product category model
 model ProductCategory {
-  id        String   @id @default(uuid())
-  categoryName      String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           String   @id @default(uuid())
+  categoryName String   @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 
   // relations
   product Product[]
@@ -205,14 +207,96 @@ model ProductVariant {
   updatedAt DateTime @updatedAt
 
   // relations
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  productId String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId  String
+  carts      Cart[]
+  orderItems OrderItem[]
 
   @@unique([productId, size])
-  @@map("varitents")
+  @@index([productId])
+  @@map("varitants")
+}
+
+// cart model -- bag
+model Cart {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  productVariantId String
+
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+
+  order   Order?  @relation(fields: [orderId], references: [id])
+  orderId String?
+
+  @@unique([productVariantId, customerId])
+  @@index([customerId])
+  @@map("carts")
+}
+
+// order model -- entire order summery,parmanent records
+model Order {
+  id              String        @id @default(uuid())
+  totalAmount     Float
+  contactNumber   String
+  deliveryAddress String
+  orderStatus     OrderStatus   @default(PENDING)
+  paymentStatus   PaymentStatus @default(PENDING)
+
+  // relations
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  carts      Cart[]
+  orderItems OrderItem[]
+
+  @@index([customerId])
+  @@map("orders")
+}
+
+// order item model -- mainly for invoice
+model OrderItem {
+  id String @id @default(uuid())
+
+  quantity Int   @default(1)
+  price    Float @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // relations
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId          String
+  productVariant   ProductVariant @relation(fields: [productVariantId], references: [id], onDelete: Cascade)
+  productVariantId String
+
+  @@unique([orderId, productVariantId])
+  @@index([orderId])
+  @@index([productVariantId])
+  @@map("order_items")
 }
 
 // enums
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 enum Gender {
   MALE
   FEMALE
