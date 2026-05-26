@@ -2,8 +2,8 @@ import status from "http-status";
 import { prisma } from "../../lib/prisma";
 import AppError from "../../middleware/appError";
 import { IRequestUserInterface } from "../../interfaces/requestUserInterface";
-import { Role } from "../../../generated/prisma/enums";
 import { ICreateOrderPayload } from "./order.interface";
+import { OrderStatus, PaymentStatus } from "../../../generated/prisma/enums";
 
 const createOrderService = async (
   user: IRequestUserInterface,
@@ -22,48 +22,94 @@ const createOrderService = async (
     throw new AppError(status.UNAUTHORIZED, "User not found");
   }
 
-  // user role can't be seller
-  if (userData.role === Role.SELLER) {
-    throw new AppError(status.FORBIDDEN, "Seller can't create order");
+  const customerId = userData.customers[0]?.id;
+
+  if (!customerId) {
+    throw new AppError(status.NOT_FOUND, "Customer profile not found for this user");
+  }
+
+  // when payload is empty
+  if (!payload.orderItems || payload.orderItems.length === 0) {
+    throw new AppError(status.BAD_REQUEST, "No items provided to create an order");
   }
 
   // create order part
   const result = await prisma.$transaction(async (tx) => {
-    // cart
-    const createCart = await tx.cart.create({
-      data: {
-        customerId: userData.customers[0]?.id as string,
-        quantity: payload.carts[0].quantity,
-        productVariantId: payload.carts[0].productVariantId,
-      },
-    });
+
+    let calculateTotalAmount = 0
+    const itemsToCreate = []
+
+    // find the product variant and check stock
+    for (const item of payload.orderItems) {
+      const variants = await tx.productVariant.findUnique({
+        where: {
+          id: item.productVariantId
+        }
+      })
+
+      if (!variants) {
+        throw new AppError(status.NOT_FOUND, "Item not found");
+      }
+
+      if (variants.stock < item.quantity) {
+        throw new AppError(status.BAD_REQUEST, `Insufficient stock for variant. Available: ${variants.stock}, Requested: ${item.quantity}`);
+      }
+
+      await tx.productVariant.update({
+        where: {
+          id: item.productVariantId
+        },
+        data: {
+          stock: {
+            decrement: item.quantity
+          }
+        }
+      })
+
+      calculateTotalAmount = calculateTotalAmount + (variants.price * item.quantity)
+
+      itemsToCreate.push({
+        productVariantId: item.productVariantId,
+        quantity: item.quantity,
+        price: variants.price,
+      })
+    }
+
 
     // order
     const createOrder = await tx.order.create({
       data: {
-        customerId: userData.customers[0]?.id as string,
-        totalAmount: payload.order.totalAmount,
+        customerId: customerId,
+        totalAmount: calculateTotalAmount,
         contactNumber: payload.order.contactNumber,
         deliveryAddress: payload.order.deliveryAddress,
-        orderStatus: payload.order.orderStatus,
-        paymentStatus: payload.order.paymentStatus,
+        orderStatus: OrderStatus.PENDING,
+        paymentStatus: PaymentStatus.UNPAID,
       },
     });
 
     // order item
-    const createOrderItem = await tx.orderItem.create({
-      data: {
-        orderId: createOrder.id,
-        productVariantId: payload.orderItems[0].productVariantId,
-        quantity: payload.orderItems[0].quantity,
-        price: payload.orderItems[0].price,
-      },
-    });
+    const createOrderItem = itemsToCreate.map((item) => ({
+      orderId: createOrder.id,
+      productVariantId: item.productVariantId,
+      quantity: item.quantity,
+      price: item.price,
+    }))
+
+    await tx.orderItem.createMany({
+      data: createOrderItem,
+    })
+
+    // noew clear the cart
+    await tx.cart.deleteMany({
+      where: {
+        customerId
+      }
+    })
 
     return {
-      createCart,
-      createOrder,
-      createOrderItem,
+      order: createOrder,
+      orderItemCount: createOrderItem.length,
     };
   });
 

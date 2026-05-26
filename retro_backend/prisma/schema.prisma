@@ -214,7 +214,7 @@ model ProductVariant {
 
   @@unique([productId, size])
   @@index([productId])
-  @@map("varitants")
+  @@map("variants")
 }
 
 // cart model -- bag
@@ -246,7 +246,7 @@ model Order {
   contactNumber   String
   deliveryAddress String
   orderStatus     OrderStatus   @default(PENDING)
-  paymentStatus   PaymentStatus @default(PENDING)
+  paymentStatus   PaymentStatus @default(UNPAID)
 
   // relations
   customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -285,8 +285,8 @@ model OrderItem {
 
 // enums
 enum PaymentStatus {
-  PENDING
-  COMPLETED
+  UNPAID
+  PAID
 }
 
 enum OrderStatus {
