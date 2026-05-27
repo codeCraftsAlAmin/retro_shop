@@ -250,9 +250,44 @@ const deleteProductService = async (
   });
 };
 
+const updateIsFeaturedService = async (
+  productId: string,
+  payload: { isFeatured: boolean },
+) => {
+  // find product
+  const isExist = await prisma.product.findUnique({
+    where: {
+      id: productId,
+      isDeleted: false,
+    },
+  });
+
+  if (!isExist) {
+    throw new AppError(status.NOT_FOUND, "Product not found");
+  }
+
+  if (isExist.isFeatured === payload.isFeatured) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      `Product is already ${payload.isFeatured}`,
+    );
+  }
+
+  // update product
+  await prisma.product.update({
+    where: {
+      id: productId,
+    },
+    data: {
+      isFeatured: payload.isFeatured,
+    },
+  });
+};
+
 export const productService = {
   createProductService,
   updateProductService,
   getAllProductsService,
   deleteProductService,
+  updateIsFeaturedService,
 };

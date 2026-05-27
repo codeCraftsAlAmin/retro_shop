@@ -42,4 +42,11 @@ router.delete(
   productController.deleteProductController,
 );
 
+// udpate isFeatured
+router.put(
+  "/update-is-featured/:id",
+  checkAuth(Role.ADMIN),
+  productController.updateIsFeaturedController,
+);
+
 export const productRouter: Router = router;

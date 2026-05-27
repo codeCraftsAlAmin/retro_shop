@@ -71,9 +71,24 @@ const deleteProductController = catchAsync(
   },
 );
 
+const updateIsFeaturedController = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.params.id;
+
+    await productService.updateIsFeaturedService(id as string, req.body);
+
+    sendResponse(res, {
+      ok: true,
+      statusCode: status.OK,
+      message: "Product feature updated successfully",
+    });
+  },
+);
+
 export const productController = {
   createProductController,
   updateProductController,
   getAllProductsController,
   deleteProductController,
+  updateIsFeaturedController,
 };
