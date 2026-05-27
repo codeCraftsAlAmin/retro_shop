@@ -15,4 +15,7 @@ router.post(
   orderController.createOrderController,
 );
 
+// get all orders
+router.get("/", checkAuth(Role.CUSTOMER, Role.ADMIN, Role.SELLER), orderController.getAllOrders);
+
 export const orderRouter: Router = router;
