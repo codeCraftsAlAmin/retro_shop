@@ -16,6 +16,18 @@ router.post(
 );
 
 // get all orders
-router.get("/", checkAuth(Role.CUSTOMER, Role.ADMIN, Role.SELLER), orderController.getAllOrders);
+router.get(
+  "/",
+  checkAuth(Role.CUSTOMER, Role.ADMIN, Role.SELLER),
+  orderController.getAllOrders,
+);
+
+// update ordere status
+router.put(
+  "/:id",
+  checkAuth(Role.CUSTOMER, Role.ADMIN, Role.SELLER),
+  // validateRequeset(orderValidation.updateOrderValidation),
+  orderController.updateOrderController,
+);
 
 export const orderRouter: Router = router;

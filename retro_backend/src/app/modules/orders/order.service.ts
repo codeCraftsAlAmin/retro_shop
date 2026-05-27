@@ -249,7 +249,122 @@ const getAllOrdersService = async (
   return result;
 };
 
+const updateOrderService = async (
+  orderId: string,
+  user: IRequestUserInterface,
+  payload: { orderStatus: OrderStatus },
+) => {
+  // find the user
+  const userData = await prisma.user.findUnique({
+    where: {
+      email: user.email,
+    },
+    include: {
+      customers: true,
+      sellers: true,
+      admins: true,
+    },
+  });
+
+  if (!userData) {
+    throw new AppError(status.UNAUTHORIZED, "User not found");
+  }
+
+  // find the order
+  const existOrder = await prisma.order.findUnique({
+    where: {
+      id: orderId,
+    },
+    include: {
+      orderItems: {
+        include: {
+          productVariant: {
+            include: { product: true },
+          },
+        },
+      },
+    },
+  });
+
+  if (!existOrder) {
+    throw new AppError(status.NOT_FOUND, "Order not found");
+  }
+
+  if (
+    existOrder.orderStatus === OrderStatus.CANCELLED ||
+    existOrder.orderStatus === OrderStatus.DELIVERED
+  ) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Completed or cancelled orders cannot be updated",
+    );
+  }
+
+  // for customer
+  if (userData.role === Role.CUSTOMER) {
+    if (existOrder.customerId !== userData.customers[0]?.id) {
+      throw new AppError(status.UNAUTHORIZED, "Unauthorized to update order");
+    }
+
+    const isValidCurrStatus =
+      existOrder.orderStatus === OrderStatus.PENDING ||
+      existOrder.orderStatus === OrderStatus.PROCESSING;
+
+    if (payload.orderStatus === OrderStatus.CANCELLED && isValidCurrStatus) {
+      const updateStatus = await prisma.order.update({
+        where: {
+          id: orderId,
+        },
+        data: {
+          orderStatus: payload.orderStatus,
+        },
+      });
+      return updateStatus;
+    }
+    throw new AppError(
+      status.BAD_REQUEST,
+      "You can only cancel orders that are pending or processing",
+    );
+  }
+
+  // for seller and admin
+  if (userData.role === Role.SELLER) {
+    const sellerId = userData.sellers[0]?.id;
+
+    if (!sellerId) {
+      throw new AppError(
+        status.NOT_FOUND,
+        "Seller profile not found for this user",
+      );
+    }
+
+    // find the own order by seller
+    const isOwnOrder = existOrder.orderItems.some(
+      (item) => item.productVariant.product.sellerId === sellerId,
+    );
+
+    if (!isOwnOrder) {
+      throw new AppError(status.UNAUTHORIZED, "Unauthorized to update order");
+    }
+  }
+
+  const updateStatus = await prisma.order.update({
+    where: {
+      id: orderId,
+    },
+    data: {
+      orderStatus: payload.orderStatus,
+      paymentStatus:
+        payload.orderStatus === OrderStatus.DELIVERED
+          ? PaymentStatus.PAID
+          : existOrder.paymentStatus,
+    },
+  });
+  return updateStatus;
+};
+
 export const orderService = {
   createOrderService,
   getAllOrdersService,
+  updateOrderService,
 };
