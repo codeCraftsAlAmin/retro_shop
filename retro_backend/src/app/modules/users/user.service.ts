@@ -17,9 +17,39 @@ const getMyProfileService = async (user: IRequestUserInterface) => {
       id: user.userId,
     },
     select: {
-      customers: true,
-      admins: true,
-      sellers: true,
+      customers: {
+        select: {
+          name: true,
+          email: true,
+          profilePhoto: true,
+          phone: true,
+          gender: true,
+          address: true,
+          userId: true,
+        },
+      },
+      admins: {
+        select: {
+          name: true,
+          email: true,
+          profilePhoto: true,
+          phone: true,
+          gender: true,
+          address: true,
+          userId: true,
+        },
+      },
+      sellers: {
+        select: {
+          name: true,
+          email: true,
+          profilePhoto: true,
+          phone: true,
+          gender: true,
+          address: true,
+          userId: true,
+        },
+      },
     },
   });
 
@@ -43,21 +73,28 @@ const getAllUsersService = async (
     filterableFields: userFilterableFields,
   });
 
+  const whereSearch: Prisma.UserWhereInput = {
+    isDeleted: false,
+    id: { not: user.userId },
+  };
+
+  if (query.name && typeof query.name === "string") {
+    whereSearch.name = query.name;
+    delete query.name;
+  }
+
+  if (query.email && typeof query.email === "string") {
+    whereSearch.email = query.email;
+    delete query.email;
+  }
+
   const result = await queryBuilders
     .search()
     .filter()
-    .where({ isDeleted: false, id: { not: user.userId } })
+    .where(whereSearch)
     .sort()
-    // TODO: it will be changed later
     .include({
       customers: {
-        select: {
-          id: true,
-          email: true,
-          address: true,
-        },
-      },
-      admins: {
         select: {
           id: true,
           email: true,
@@ -76,8 +113,6 @@ const getAllUsersService = async (
     .fields()
     .pagination()
     .execute();
-
-  // console.log("result ~ 🔑🕙", result);
   return result;
 };
 
