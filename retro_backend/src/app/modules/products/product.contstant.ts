@@ -32,6 +32,21 @@ const productIncludingConfig: Partial<
       categoryName: true,
     },
   },
+  reviews: {
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+        },
+      },
+    },
+  },
+  
 };
 export {
   productFilterableFields,

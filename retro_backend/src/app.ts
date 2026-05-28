@@ -15,6 +15,7 @@ import { adminRouter } from "./app/modules/admins/admin.route";
 import { categoryRouter } from "./app/modules/categories/category.route";
 import { productRouter } from "./app/modules/products/product.route";
 import { orderRouter } from "./app/modules/orders/order.route";
+import { reviewRouter } from "./app/modules/reviews/review.route";
 
 const app: Application = express();
 
@@ -67,6 +68,9 @@ app.use("/api/products", productRouter);
 
 // order route
 app.use("/api/orders", orderRouter);
+
+// review route
+app.use("/api/reviews", reviewRouter);
 
 // base route
 app.get("/", (req: Request, res: Response) => {

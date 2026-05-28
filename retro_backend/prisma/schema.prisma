@@ -29,6 +29,7 @@ model User {
   customers Customer[]
   sellers   Seller[]
   admins    Admin[]
+  reviews   Review[]
 
   @@unique([email])
   @@index([email, id])
@@ -176,8 +177,9 @@ model Product {
   category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId String
 
-  seller   Seller @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  seller   Seller   @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   sellerId String
+  reviews  Review[]
 
   @@index([sellerId])
   @@index([categoryId])
@@ -281,6 +283,32 @@ model OrderItem {
   @@index([orderId])
   @@index([productVariantId])
   @@map("order_items")
+}
+
+// review model
+model Review {
+  id        String    @id @default(uuid())
+  rating    Int       @default(0)
+  comment   String?
+  isDeleted Boolean   @default(false)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  // for replies
+  parent   Review?  @relation("ReviewReplies", fields: [parentId], references: [id])
+  parentId String?
+  replies  Review[] @relation("ReviewReplies")
+
+  // relations
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+
+  @@index([userId])
+  @@index([productId])
+  @@map("reviews")
 }
 
 // enums

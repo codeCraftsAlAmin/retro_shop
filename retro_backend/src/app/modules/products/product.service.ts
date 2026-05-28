@@ -204,6 +204,20 @@ const getAllProductsService = async (query: IQueryParams) => {
           categoryName: true,
         },
       },
+      reviews: {
+        select: {
+          id: true,
+          rating: true,
+          comment: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+        },
+      },
     })
     .dynamicInclude(productIncludingConfig)
     .fields()

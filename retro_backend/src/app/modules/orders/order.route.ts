@@ -26,7 +26,6 @@ router.get(
 router.put(
   "/:id",
   checkAuth(Role.CUSTOMER, Role.ADMIN, Role.SELLER),
-  // validateRequeset(orderValidation.updateOrderValidation),
   orderController.updateOrderController,
 );
 
