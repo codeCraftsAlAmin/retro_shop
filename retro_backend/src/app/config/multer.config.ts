@@ -4,8 +4,7 @@ import { cloudinaryUpload } from "./cloudinary.config";
 
 // upload file to cloudinary using multer
 const storage = new CloudinaryStorage({
-  cloudinary: cloudinaryUpload as any, // remove as any after implementing cloudinary in project
-
+  cloudinary: cloudinaryUpload,
   params: (req, file) => {
     // extract the extension from file
     const extension = file.originalname.split(".").pop()?.toLocaleLowerCase();

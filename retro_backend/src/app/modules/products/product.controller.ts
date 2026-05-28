@@ -85,10 +85,29 @@ const updateIsFeaturedController = catchAsync(
   },
 );
 
+const getMyProductsController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    const query = req.query;
+    const result = await productService.getMyProductsService(
+      user!,
+      query as IQueryParams,
+    );
+
+    sendResponse(res, {
+      ok: true,
+      statusCode: status.OK,
+      message: "Products fetched successfully",
+      data: result,
+    });
+  },
+);
+
 export const productController = {
   createProductController,
   updateProductController,
   getAllProductsController,
   deleteProductController,
   updateIsFeaturedController,
+  getMyProductsController,
 };

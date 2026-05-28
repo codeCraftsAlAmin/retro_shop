@@ -298,10 +298,77 @@ const updateIsFeaturedService = async (
   });
 };
 
+const getMyProductsService = async (
+  user: IRequestUserInterface,
+  query: IQueryParams,
+) => {
+  // find seller
+  const sellerData = await prisma.seller.findUnique({
+    where: {
+      email: user.email,
+    },
+  });
+
+  if (!sellerData) {
+    throw new AppError(status.NOT_FOUND, "Seller not found");
+  }
+
+  if (query.price) {
+    query["variants.some.price"] = query.price;
+    delete query.price;
+  }
+  if (query.size) {
+    query["variants.some.size"] = query.size;
+    delete query.size;
+  }
+  if (query.categoryName) {
+    query["category.categoryName"] = query.categoryName;
+    delete query.categoryName;
+  }
+
+  const queryBuilders = new QueryBuilder<
+    Product,
+    Prisma.ProductWhereInput,
+    Prisma.ProductInclude
+  >(prisma.product, query, {
+    searchableFields: productSearchedFields,
+    filterableFields: productFilterableFields,
+  });
+
+  const result = await queryBuilders
+    .search()
+    .filter()
+    .where({ isDeleted: false, sellerId: sellerData.id })
+    .sort()
+    .include({
+      variants: {
+        select: {
+          id: true,
+          price: true,
+          stock: true,
+          size: true,
+        },
+      },
+      category: {
+        select: {
+          id: true,
+          categoryName: true,
+        },
+      },
+    })
+    .dynamicInclude(productIncludingConfig)
+    .fields()
+    .pagination()
+    .execute();
+
+  return result;
+};
+
 export const productService = {
   createProductService,
   updateProductService,
   getAllProductsService,
   deleteProductService,
   updateIsFeaturedService,
+  getMyProductsService,
 };

@@ -49,4 +49,11 @@ router.put(
   productController.updateIsFeaturedController,
 );
 
+// get my own products
+router.get(
+  "/get-my-products",
+  checkAuth(Role.SELLER),
+  productController.getMyProductsController,
+);
+
 export const productRouter: Router = router;
