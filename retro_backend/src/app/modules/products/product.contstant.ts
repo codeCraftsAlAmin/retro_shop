@@ -11,6 +11,7 @@ const productFilterableFields = [
   "variants.some.price",
   "variants.some.size",
   "variants.stock",
+  "tags"
 ];
 
 const productIncludingConfig: Partial<

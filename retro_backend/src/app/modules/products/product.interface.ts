@@ -8,6 +8,7 @@ export interface IProduct {
   brand: string;
   description?: string;
   images: string[];
+  tags?: string[];
 }
 
 export interface IProductVariant {
@@ -30,6 +31,7 @@ export interface IUProduct {
   brand?: string;
   description?: string;
   images?: string[];
+  tags?: string[];
 }
 
 export interface IUpdateProductVariant {

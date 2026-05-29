@@ -163,6 +163,7 @@ model Product {
   teamName    String
   year        String
   brand       String
+  tags        String[]  @default([])
   description String?
   images      String[]
   isFeatured  Boolean   @default(false)
@@ -183,6 +184,9 @@ model Product {
 
   @@index([sellerId])
   @@index([categoryId])
+  @@index([teamName])
+  @@index([year])
+  @@index([brand])
   @@map("products")
 }
 

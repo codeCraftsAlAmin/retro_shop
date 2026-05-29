@@ -8,7 +8,11 @@ const createProductValidation = z.object({
     year: z.string({ message: "Year is required" }),
     brand: z.string({ message: "Brand is required" }),
     description: z.string().optional(),
-    images: z.array(z.string({ message: "Images are required" })).optional(),
+    images: z.array(z.string({ message: "Images are required" })),
+    tags: z
+      .array(z.string({ message: "Tags must be a string array" }))
+      .optional()
+      .default([]),
   }),
 
   categoryName: z
@@ -39,6 +43,10 @@ const updateProductValidation = z.object({
     images: z
       .array(z.string({ message: "Images must be a string array" }))
       .optional(),
+    tags: z
+      .array(z.string({ message: "Tags must be a string array" }))
+      .optional()
+      .default([]),
   }),
 
   // variants

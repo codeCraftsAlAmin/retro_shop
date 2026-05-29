@@ -48,6 +48,7 @@ const createProductService = async (
         brand: payload.product.brand,
         description: payload.product.description ?? "",
         images: payload.product.images,
+        tags: payload.product.tags,
         sellerId: sellerData.id,
         categoryId: category.id,
       },
@@ -173,6 +174,15 @@ const getAllProductsService = async (query: IQueryParams) => {
   if (query.categoryName) {
     query["category.categoryName"] = query.categoryName;
     delete query.categoryName;
+  }
+
+  if (query.tags && typeof query.tags === "string") {
+    const tagsArray = query.tags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase());
+    query.tags = {
+      hasSome: tagsArray,
+    };
   }
 
   const queryBuilders = new QueryBuilder<
@@ -324,6 +334,15 @@ const getMyProductsService = async (
   if (query.categoryName) {
     query["category.categoryName"] = query.categoryName;
     delete query.categoryName;
+  }
+
+  if (query.tags && typeof query.tags === "string") {
+    const tagsArray = query.tags
+      .split(",")
+      .map((tag) => tag.trim().toLowerCase());
+    query.tags = {
+      hasSome: tagsArray,
+    };
   }
 
   const queryBuilders = new QueryBuilder<

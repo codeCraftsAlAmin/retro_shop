@@ -18,6 +18,10 @@ export const uploadProductMiddleware = (
   const files = req.files as Express.Multer.File[];
   const imagePaths = files?.map((file) => file.path) || [];
 
+  // convet string to array
+  const tags =
+    typeof body.tags === "string" ? JSON.parse(body.tags) : body.tags || [];
+
   // make product payload
   const payload = {
     categoryName: body.categoryName,
@@ -29,6 +33,7 @@ export const uploadProductMiddleware = (
       brand: body.brand,
       description: body.description,
       images: imagePaths, // directly set array images
+      tags,
     },
   };
 
@@ -55,21 +60,25 @@ export const updateUpProductMiddleware = (
   const files = req.files as Express.Multer.File[];
   const imagePaths = files?.map((file) => file.path) || [];
 
+  // convet string to array
+  const tags =
+    typeof body.tags === "string" ? JSON.parse(body.tags) : body.tags || [];
+
   // make product payload
   const payload: any = {
-    variants: variants,
-    product: body.product || {},
+    product: {},
   };
 
+  if (variants !== undefined) {
+    payload.variants = variants;
+  }
+
+  if (tags && Array.isArray(tags)) {
+    payload.product.tags = tags.map((tag) => tag.trim());
+  }
+
   // if these fields exist in body, then set them in product
-  const productFields = [
-    "name",
-    "teamName",
-    "year",
-    "brand",
-    "description",
-    "images",
-  ];
+  const productFields = ["name", "teamName", "year", "brand", "description"];
 
   productFields.forEach((field) => {
     if (body[field] !== undefined) {
