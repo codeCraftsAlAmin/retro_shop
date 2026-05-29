@@ -62,6 +62,13 @@ const createOrderService = async (
         where: {
           id: item.productVariantId,
         },
+        include: {
+          product: {
+            select: {
+              tags: true,
+            },
+          },
+        },
       });
 
       if (!variants) {
@@ -73,6 +80,19 @@ const createOrderService = async (
           status.BAD_REQUEST,
           `Insufficient stock for variant. Available: ${variants.stock}, Requested: ${item.quantity}`,
         );
+      }
+
+      // tag validation
+      const availableTags = variants.product.tags;
+
+      if (availableTags.length > 0) {
+        if (!item.selectedTag) {
+          throw new AppError(status.BAD_REQUEST, "Please select a tag");
+        }
+
+        if (!availableTags.includes(item.selectedTag)) {
+          throw new AppError(status.BAD_REQUEST, "Invalid tag selected");
+        }
       }
 
       await tx.productVariant.update({
@@ -93,6 +113,7 @@ const createOrderService = async (
         productVariantId: item.productVariantId,
         quantity: item.quantity,
         price: variants.price,
+        selectedTag: item.selectedTag ?? null,
       });
     }
 
@@ -114,6 +135,7 @@ const createOrderService = async (
       productVariantId: item.productVariantId,
       quantity: item.quantity,
       price: item.price,
+      selectedTag: item.selectedTag,
     }));
 
     await tx.orderItem.createMany({

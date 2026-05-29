@@ -7,6 +7,7 @@ export interface IOrderItem {
   productVariantId: string;
   quantity: number;
   price: number;
+  selectedTag?: string;
 }
 
 export interface ICreateOrderPayload {

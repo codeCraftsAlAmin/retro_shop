@@ -13,6 +13,7 @@ const createOrderValidation = z.object({
       z.object({
         productVariantId: z.string({ message: "Variant ID is required" }),
         quantity: z.number({ message: "Quantity is required" }).int().min(1),
+        selectedTag: z.string().optional(),
       }),
     )
     .min(1, "At least one item is required"),

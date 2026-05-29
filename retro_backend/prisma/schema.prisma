@@ -271,8 +271,9 @@ model Order {
 model OrderItem {
   id String @id @default(uuid())
 
-  quantity Int   @default(1)
-  price    Float @default(0)
+  quantity    Int     @default(1)
+  price       Float   @default(0)
+  selectedTag String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
