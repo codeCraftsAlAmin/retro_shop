@@ -56,8 +56,28 @@ const updateOrderController = catchAsync(
   },
 );
 
+const cancelOrderController = catchAsync(
+  async (req: Request, res: Response) => {
+    const user = req.user;
+    const id = req.params.id;
+    const payload = req.body;
+    await orderService.cancelOrderService(
+      id as string,
+      user!,
+      payload,
+    );
+
+    sendResponse(res, {
+      ok: true,
+      statusCode: status.OK,
+      message: "Order cancelled successfully",
+    });
+  },
+);
+
 export const orderController = {
   createOrderController,
   getAllOrders,
   updateOrderController,
+  cancelOrderController,
 };

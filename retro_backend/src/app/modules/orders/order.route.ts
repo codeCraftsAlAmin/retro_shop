@@ -29,4 +29,11 @@ router.put(
   orderController.updateOrderController,
 );
 
+// cancel order
+router.put(
+  "/:id/cancel",
+  checkAuth(Role.CUSTOMER),
+  orderController.cancelOrderController,
+);
+
 export const orderRouter: Router = router;
