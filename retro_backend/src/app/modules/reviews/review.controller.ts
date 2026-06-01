@@ -61,12 +61,13 @@ const deleteReviewController = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
     const user = req.user;
-    await reviewService.deleteReview(id as string, user!);
+    const result = await reviewService.deleteReview(id as string, user!);
 
     sendResponse(res, {
       ok: true,
       statusCode: status.OK,
       message: "Review deleted successfully",
+      data: result,
     });
   },
 );

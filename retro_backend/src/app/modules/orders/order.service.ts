@@ -343,19 +343,68 @@ const updateOrderService = async (
     }
   }
 
-  const updateStatus = await prisma.order.update({
-    where: {
-      id: orderId,
-    },
-    data: {
-      orderStatus: payload.orderStatus,
-      paymentStatus:
-        payload.orderStatus === OrderStatus.DELIVERED
-          ? PaymentStatus.PAID
-          : existOrder.paymentStatus,
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    const updateStatus = await tx.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: payload.orderStatus,
+        paymentStatus:
+          payload.orderStatus === OrderStatus.DELIVERED
+            ? PaymentStatus.PAID
+            : existOrder.paymentStatus,
+      },
+    });
+
+    if (
+      payload.orderStatus === OrderStatus.DELIVERED ||
+      payload.orderStatus === OrderStatus.CANCELLED
+    ) {
+      for (const item of existOrder.orderItems) {
+        const productId = item.productVariant.productId;
+        const productQuantity = item.quantity;
+        const variantId = item.productVariant.id;
+
+        if (payload.orderStatus === OrderStatus.DELIVERED) {
+          await tx.product.update({
+            where: {
+              id: productId,
+            },
+            data: {
+              sellCount: { increment: productQuantity },
+            },
+          });
+        }
+
+        if (payload.orderStatus === OrderStatus.CANCELLED) {
+          await tx.product.update({
+            where: {
+              id: productId,
+            },
+            data: {
+              sellCount: {
+                decrement: productQuantity,
+              },
+            },
+          });
+
+          await tx.productVariant.update({
+            where: {
+              id: variantId,
+            },
+            data: {
+              stock: { increment: productQuantity },
+            },
+          });
+        }
+      }
+    }
+
+    return updateStatus;
   });
-  return updateStatus;
+
+  return result;
 };
 
 const cancelOrderService = async (
@@ -384,9 +433,8 @@ const cancelOrderService = async (
     },
     include: {
       orderItems: {
-        select: {
-          productVariantId: true,
-          quantity: true,
+        include: {
+          productVariant: true,
         },
       },
     },
@@ -415,31 +463,44 @@ const cancelOrderService = async (
     existOrder.orderStatus === OrderStatus.PENDING ||
     existOrder.orderStatus === OrderStatus.PROCESSING;
 
-  if (payload.orderStatus === OrderStatus.CANCELLED && isValidCurrStatus) {
-    await prisma.$transaction(async (tx) => {
-      // update order
-      await tx.order.update({
+  if (!isValidCurrStatus) {
+    throw new AppError(
+      status.BAD_REQUEST,
+      "Only pending or processing orders can be cancelled",
+    );
+  }
+
+  if (payload.orderStatus !== OrderStatus.CANCELLED) {
+    throw new AppError(status.BAD_REQUEST, "Invalid action for cancel service");
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    // update order
+    await tx.order.update({
+      where: {
+        id: orderId,
+      },
+      data: {
+        orderStatus: payload.orderStatus,
+      },
+    });
+
+    // update inventory
+    for (const item of existOrder.orderItems) {
+      const productId = item.productVariant.productId;
+      const variantId = item.productVariant.id;
+      const quantity = item.quantity;
+
+      await tx.productVariant.update({
         where: {
-          id: orderId,
+          id: variantId,
         },
         data: {
-          orderStatus: payload.orderStatus,
+          stock: { increment: quantity },
         },
       });
-
-      // update inventory
-      for (const item of existOrder.orderItems) {
-        await tx.productVariant.update({
-          where: {
-            id: item.productVariantId,
-          },
-          data: {
-            stock: { increment: item.quantity },
-          },
-        });
-      }
-    });
-  }
+    }
+  });
 };
 
 export const orderService = {

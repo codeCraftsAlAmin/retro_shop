@@ -61,7 +61,7 @@ const cancelOrderController = catchAsync(
     const user = req.user;
     const id = req.params.id;
     const payload = req.body;
-    await orderService.cancelOrderService(
+    const result = await orderService.cancelOrderService(
       id as string,
       user!,
       payload,
@@ -71,6 +71,7 @@ const cancelOrderController = catchAsync(
       ok: true,
       statusCode: status.OK,
       message: "Order cancelled successfully",
+      data: result,
     });
   },
 );

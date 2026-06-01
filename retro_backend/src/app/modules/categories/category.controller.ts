@@ -37,12 +37,13 @@ const getAllCategoriesController = catchAsync(
 const deleteCategoryController = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    await categoryService.deleteCategoryService(id as string);
+    const result = await categoryService.deleteCategoryService(id as string);
 
     sendResponse(res, {
       ok: true,
       statusCode: status.OK,
       message: "Category deleted successfully",
+      data: result,
     });
   },
 );

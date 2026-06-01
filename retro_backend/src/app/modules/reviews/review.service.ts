@@ -245,7 +245,7 @@ const deleteReview = async (reviewId: string, user: IRequestUserInterface) => {
   }
 
   // delete review
-  await prisma.review.update({
+  return await prisma.review.update({
     where: {
       id: reviewId,
     },

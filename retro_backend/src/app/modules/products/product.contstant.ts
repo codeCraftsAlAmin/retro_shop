@@ -1,6 +1,6 @@
 import { Prisma } from "../../../generated/prisma/client";
 
-const productSearchedFields = ["name", "brand", "teamName"];
+const productSearchedFields = ["name", "brand", "teamName", "tags"];
 
 const productFilterableFields = [
   "name",

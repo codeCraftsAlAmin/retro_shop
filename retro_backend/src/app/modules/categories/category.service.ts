@@ -30,7 +30,7 @@ const getAllCategoriesService = async () => {
 };
 
 const deleteCategoryService = async (id: string) => {
-  await prisma.productCategory.delete({
+ return await prisma.productCategory.delete({
     where: {
       id,
     },
