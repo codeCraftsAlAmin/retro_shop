@@ -160,7 +160,7 @@ model Seller {
 model Product {
   id          String    @id @default(uuid())
   name        String
-  teamName    String
+  teamName    String?
   year        String
   brand       String
   tags        String[]  @default([])

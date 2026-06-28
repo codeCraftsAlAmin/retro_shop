@@ -34,6 +34,9 @@ const getAdminStatsData = async () => {
     orderCount,
     reviewCount,
     revenueCount,
+    pieChartData,
+    barChartData,
+    lineChartData,
   ] = await Promise.all([
     // total users
     prisma.user.groupBy({
@@ -67,143 +70,163 @@ const getAdminStatsData = async () => {
         totalAmount: true,
       },
     }),
-
     getAdminPieChartData(),
+    getAdminBarChartData(),
+    getAdminLineChartData(),
   ]);
 
   return {
-    totalCustomersCount:
-      userCount.find((user) => user.role === Role.CUSTOMER)?._count || 0,
+    cardStats: {
+      totalCustomersCount:
+        userCount.find((user) => user.role === Role.CUSTOMER)?._count || 0,
 
-    totalSellersCount:
-      userCount.find((user) => user.role === Role.SELLER)?._count || 0,
+      totalSellersCount:
+        userCount.find((user) => user.role === Role.SELLER)?._count || 0,
 
-    totalCategoryCount: categoryCount,
+      totalCategoryCount: categoryCount,
 
-    totalProductCount: productCount,
+      totalProductCount: productCount,
 
-    totalCancelledOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.CANCELLED)
-        ?._count || 0,
+      totalCancelledOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.CANCELLED)
+          ?._count || 0,
 
-    totalPendingOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.PENDING)
-        ?._count || 0,
+      totalPendingOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.PENDING)
+          ?._count || 0,
 
-    totalDeliveredOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.DELIVERED)
-        ?._count || 0,
+      totalDeliveredOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.DELIVERED)
+          ?._count || 0,
 
-    totalShippedOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.SHIPPED)
-        ?._count || 0,
+      totalShippedOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.SHIPPED)
+          ?._count || 0,
 
-    totalProcessingOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.PROCESSING)
-        ?._count || 0,
+      totalProcessingOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.PROCESSING)
+          ?._count || 0,
 
-    totalReviewCount: reviewCount,
+      totalReviewCount: reviewCount,
 
-    totalRevenueCount: revenueCount._sum?.totalAmount || 0,
+      totalRevenueCount: revenueCount._sum?.totalAmount || 0,
+    },
+    pieChartData,
+    barChartData,
+    lineChartData,
   };
 };
 
 const getSellerStatsData = async (user: IRequestUserInterface) => {
-  const [categoryCount, productCount, orderCount, reviewCount, revenueCount] =
-    await Promise.all([
-      // total categories
-      prisma.product.groupBy({
-        where: {
-          sellerId: user.userId,
-          isDeleted: false,
-        },
-        by: ["categoryId"],
-      }),
+  const [
+    categoryCount,
+    productCount,
+    orderCount,
+    reviewCount,
+    revenueCount,
+    pieChartData,
+    barChartData,
+    lineChartData,
+  ] = await Promise.all([
+    // total categories
+    prisma.product.groupBy({
+      where: {
+        sellerId: user.userId,
+        isDeleted: false,
+      },
+      by: ["categoryId"],
+    }),
 
-      // total products
-      prisma.product.count({
-        where: { isDeleted: false, sellerId: user.userId },
-      }),
+    // total products
+    prisma.product.count({
+      where: { isDeleted: false, sellerId: user.userId },
+    }),
 
-      // total orders
-      prisma.order.groupBy({
-        where: {
-          orderItems: {
-            some: {
-              productVariant: {
-                product: {
-                  sellerId: user.userId,
-                },
+    // total orders
+    prisma.order.groupBy({
+      where: {
+        orderItems: {
+          some: {
+            productVariant: {
+              product: {
+                sellerId: user.userId,
               },
             },
           },
         },
-        by: ["orderStatus"],
-        _count: true,
-      }),
+      },
+      by: ["orderStatus"],
+      _count: true,
+    }),
 
-      // total reviews
-      prisma.review.count({
-        where: {
+    // total reviews
+    prisma.review.count({
+      where: {
+        product: {
+          sellerId: user.userId,
+        },
+      },
+    }),
+
+    // total revenue
+    prisma.orderItem.findMany({
+      where: {
+        productVariant: {
           product: {
             sellerId: user.userId,
           },
         },
-      }),
-
-      // total revenue
-      prisma.orderItem.findMany({
-        where: {
-          productVariant: {
-            product: {
-              sellerId: user.userId,
-            },
-          },
-          order: {
-            paymentStatus: PaymentStatus.PAID,
-          },
+        order: {
+          paymentStatus: PaymentStatus.PAID,
         },
-        select: {
-          price: true,
-          quantity: true,
-        },
-      }),
-
-      getSellerPieChartData(user),
-    ]);
+      },
+      select: {
+        price: true,
+        quantity: true,
+      },
+    }),
+    getSellerPieChartData(user),
+    getSellerBarChartData(user),
+    getSellerLineChartData(user),
+  ]);
 
   const totlaSellerRevenue = revenueCount.reduce((sum, item) => {
     return sum + item.quantity * item.price;
   }, 0);
 
   return {
-    totalCategoryCount: categoryCount.length,
+    cardStats: {
+      totalCategoryCount: categoryCount.length,
 
-    totalProductCount: productCount,
+      totalProductCount: productCount,
 
-    totalCancelledOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.CANCELLED)
-        ?._count || 0,
+      totalCancelledOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.CANCELLED)
+          ?._count || 0,
 
-    totalPendingOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.PENDING)
-        ?._count || 0,
+      totalPendingOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.PENDING)
+          ?._count || 0,
 
-    totalDeliveredOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.DELIVERED)
-        ?._count || 0,
+      totalDeliveredOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.DELIVERED)
+          ?._count || 0,
 
-    totalShippedOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.SHIPPED)
-        ?._count || 0,
+      totalShippedOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.SHIPPED)
+          ?._count || 0,
 
-    totalProcessingOrderCount:
-      orderCount.find((order) => order.orderStatus === OrderStatus.PROCESSING)
-        ?._count || 0,
+      totalProcessingOrderCount:
+        orderCount.find((order) => order.orderStatus === OrderStatus.PROCESSING)
+          ?._count || 0,
 
-    totalReviewCount: reviewCount,
+      totalReviewCount: reviewCount,
 
-    totalRevenueCount: totlaSellerRevenue,
+      totalRevenueCount: totlaSellerRevenue,
+    },
+    pieChartData,
+    barChartData,
+    lineChartData,
   };
 };
 
@@ -275,9 +298,149 @@ const getSellerPieChartData = async (user: IRequestUserInterface) => {
 };
 
 // bar charts
-// const getAdminBarChartData = async () => {
-  
-// };
+const getAdminBarChartData = async () => {
+  // total product sell count by category
+  const categorySalesRaw = await prisma.product.groupBy({
+    by: ["categoryId"],
+    where: {
+      isDeleted: false,
+    },
+    _sum: {
+      sellCount: true,
+    },
+  });
+
+  // to know the category name
+  const categories = await prisma.productCategory.findMany({
+    select: {
+      id: true,
+      categoryName: true,
+    },
+  });
+
+  const barChartData = categorySalesRaw.map((item) => {
+    const matchCategory = categories.find((cat) => cat.id === item.categoryId);
+
+    return {
+      label: matchCategory?.categoryName || "Unknown Category",
+      value: item._sum?.sellCount || 0,
+    };
+  });
+
+  return barChartData.sort((a, b) => b.value - a.value);
+};
+
+const getSellerBarChartData = async (user: IRequestUserInterface) => {
+  // total product sell count by category
+  const categorySalesRaw = await prisma.product.groupBy({
+    by: ["categoryId"],
+    where: {
+      isDeleted: false,
+      sellerId: user.userId,
+    },
+    _sum: {
+      sellCount: true,
+    },
+  });
+
+  // find category name
+  const categories = await prisma.productCategory.findMany({
+    select: {
+      id: true,
+      categoryName: true,
+    },
+  });
+
+  const barChartData = categorySalesRaw.map((item) => {
+    const matchCategory = categories.find((cat) => cat.id === item.categoryId);
+
+    return {
+      label: matchCategory?.categoryName || "Unknown Category",
+      value: item._sum?.sellCount || 0,
+    };
+  });
+
+  return barChartData.sort((a, b) => b.value - a.value);
+};
+
+// line charts
+const getAdminLineChartData = async () => {
+  const fiveMonthsAgo = new Date();
+  fiveMonthsAgo.setMonth(fiveMonthsAgo.getMonth() - 5);
+
+  // find orders
+  const orders = await prisma.order.findMany({
+    where: {
+      paymentStatus: PaymentStatus.PAID,
+      createdAt: { gte: fiveMonthsAgo },
+    },
+    select: {
+      totalAmount: true,
+      createdAt: true,
+    },
+    orderBy: {
+      createdAt: "asc",
+    },
+  });
+
+  const monthlyRevenueMap: Record<string, number> = {};
+
+  orders.forEach((order) => {
+    const monthName = order.createdAt.toLocaleString("default", {
+      month: "short",
+    });
+
+    monthlyRevenueMap[monthName] =
+      (monthlyRevenueMap[monthName] || 0) + order.totalAmount;
+  });
+
+  // frontend friendly format
+  return Object.entries(monthlyRevenueMap).map(([month, revenue]) => ({
+    label: month,
+    value: revenue,
+  }));
+};
+
+const getSellerLineChartData = async (user: IRequestUserInterface) => {
+  const fiveMonthsAgo = new Date();
+  fiveMonthsAgo.setMonth(fiveMonthsAgo.getMonth() - 5);
+
+  // find seller orders
+  const orders = await prisma.orderItem.findMany({
+    where: {
+      productVariant: { product: { sellerId: user.userId } },
+      order: {
+        paymentStatus: PaymentStatus.PAID,
+        createdAt: { gte: fiveMonthsAgo },
+      },
+    },
+    select: {
+      price: true,
+      quantity: true,
+      order: { select: { createdAt: true } },
+    },
+    orderBy: { order: {
+      createdAt: "asc"
+    } },
+  });
+
+  const monthlyRevenueMap: Record<string, number> = {};
+
+  orders.forEach((item) => {
+    const monthName = item.order.createdAt.toLocaleString("default", {
+      month: "short",
+    });
+    const itemRevenue = item.price * item.quantity;
+
+    monthlyRevenueMap[monthName] =
+      (monthlyRevenueMap[monthName] || 0) + itemRevenue;
+  });
+
+  return Object.entries(monthlyRevenueMap).map(([month, revenue]) => ({
+    label: month,
+    value: revenue
+  }));
+};
 
 export const statsService = {
   getDashboardStatsData,
