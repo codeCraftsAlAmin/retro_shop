@@ -5,6 +5,7 @@ import { Role } from "../../../generated/prisma/enums";
 
 const router = express.Router();
 
+// dashboard data
 router.get(
   "/",
   checkAuth(Role.ADMIN, Role.SELLER),
