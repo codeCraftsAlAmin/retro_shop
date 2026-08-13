@@ -46,11 +46,13 @@ const httpGet = async <TData>(
 // post request
 const httpPost = async <TData>(
   endpoint: string,
+  data: unknown,
   options?: ApiRequestOptions,
 ): Promise<ApiSuccessResponse<TData>> => {
   try {
     const response = await axiosInstance().post<ApiSuccessResponse<TData>>(
       endpoint,
+      data,
       {
         params: options?.params,
         headers: options?.headers,
@@ -67,11 +69,13 @@ const httpPost = async <TData>(
 // put request
 const httpPut = async <TData>(
   endpoint: string,
+  data: unknown,
   options?: ApiRequestOptions,
 ): Promise<ApiSuccessResponse<TData>> => {
   try {
     const response = await axiosInstance().put<ApiSuccessResponse<TData>>(
       endpoint,
+      data,
       {
         params: options?.params,
         headers: options?.headers,
