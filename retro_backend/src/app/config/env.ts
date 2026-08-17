@@ -15,7 +15,6 @@ interface envConfig {
   GOOGLE_CLIENT_SECRET: string;
   SMTP_PASS: string;
   SMTP_USER: string;
-  GEMINI_API_KEY: string;
 }
 
 const envVariables = (): envConfig => {
@@ -33,7 +32,6 @@ const envVariables = (): envConfig => {
     "GOOGLE_CLIENT_SECRET",
     "SMTP_PASS",
     "SMTP_USER",
-    "GEMINI_API_KEY",
   ];
 
   requiredVariables.forEach((v) => {
@@ -56,7 +54,6 @@ const envVariables = (): envConfig => {
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
     SMTP_PASS: process.env.SMTP_PASS as string,
     SMTP_USER: process.env.SMTP_USER as string,
-    GEMINI_API_KEY: process.env.GEMINI_API_KEY as string,
   };
 };
 
