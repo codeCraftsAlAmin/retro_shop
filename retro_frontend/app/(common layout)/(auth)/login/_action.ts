@@ -27,9 +27,10 @@ export default async function LoginAction(
       parsedPayload.data,
     );
 
-    console.log("response data ✨✨🧨", response.data);
+    // console.log("response data ✨✨🧨", response.data);
 
-    const { token } = response.data.data;
+    const { token } = response.data as unknown as ILoginResponse;
+    // console.log("better auth token ~ ✨✨✨🧨", token);
 
     setTokenInCookies("better-auth.session_token", token, 60 * 60 * 24);
 
