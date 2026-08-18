@@ -43,5 +43,6 @@ export default async function setTokenInCookies(
   token: string,
   maxAge = 60 * 60 * 24,
 ) {
+  console.log("this is token from token utils ~ ✨✨🧨",token)
   await setCookie(name, token, maxAge);
 }

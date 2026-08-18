@@ -39,7 +39,7 @@ export default function LoginForm() {
 
       const result = (await mutateAsync(value)) as any;
 
-      if (!result.success) {
+      if (!result.ok) {
         setServerError(result.message || "Login failed");
         return;
       }
