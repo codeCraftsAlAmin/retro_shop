@@ -4,7 +4,7 @@ import { TErrorSources } from "../interfaces/error.interface";
 
 export const handleZodError = (err: z.ZodError) => {
   const statusCode = status.BAD_REQUEST;
-  const message = "Zod Validation Error";
+  const message = err.issues[0].message || "Zod Validation Error";
   const errSources: TErrorSources[] = [];
 
   err.issues.forEach((issue) => {

@@ -116,16 +116,23 @@ const googleSuccessController = catchAsync(
       },
     });
 
+    // console.log("session from backend ~ ✨✨🧨", session);
+
     if (!session || !session.user) {
       return res.redirect(
         `${envVars.FRONTEND_URL}/login?error=session_token_missing`,
       );
     }
 
-    const result = await authService.googleSuccessService(session);
+    const result = await authService.googleSuccessService(session); // the prpose of using googleSuccessService was getting acc,ref token, but in this case we are not using acc/ref token so we don't need the result at all, still left it for the future
 
     // set cookie
-    tokenHelpers.setBetterAuthSessionCookie(res, result.token as string);
+    tokenHelpers.setBetterAuthSessionCookie(
+      res,
+      session.session.token as string,
+    );
+
+    // console.log("result ~ ✨✨✨🧨", result);
 
     // redirect
     const isValidRedirectPath =
