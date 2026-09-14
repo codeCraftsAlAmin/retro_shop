@@ -8,6 +8,7 @@ import { ILoginResponse } from "@/types/auth.types";
 import { ILoginPayload, loginZodSchema } from "@/zod/auth.validation";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import axios from "axios";
 
 export default async function LoginAction(
   payload: ILoginPayload,
@@ -45,22 +46,19 @@ export default async function LoginAction(
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-
-    redirect("/dashboard");
   } catch (error: any) {
-    if (
-      error &&
-      typeof error === "object" &&
-      "digest" in error &&
-      typeof error.digest === "string" &&
-      error.digest.startsWith("NEXT_REDIRECT")
-    ) {
-      throw error;
+    if (axios.isAxiosError(error)) {
+      return {
+        ok: false,
+        message: error.response?.data?.message || "Login failed",
+      };
     }
 
     return {
       ok: false,
-      message: `Login failed: ${error.message}`,
+      message: "Login failed",
     };
   }
+
+  redirect("/dashboard");
 }

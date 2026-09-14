@@ -1,7 +1,5 @@
+import RegisterForm from "@/components/modules/auth/RegistrationForm";
+
 export default async function RegisterPage() {
-  return (
-    <div>
-      <h1>Hello! This is register page</h1>
-    </div>
-  );
+  return <RegisterForm />;
 }
