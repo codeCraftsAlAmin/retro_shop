@@ -9,11 +9,12 @@ import axios from "axios";
 
 export default async function RegisterAction(
   payload: IRegisterPayload,
-): Promise<ApiErrorResponse | ApiErrorResponse> {
+): Promise<IRegisterRespone | ApiErrorResponse> {
   const parsedPayload = registerZodSchema.safeParse(payload);
 
   if (!parsedPayload.success) {
-    const firstError = parsedPayload.error.issues[0].message || "Invalid Input";
+    const firstError =
+      parsedPayload.error.issues[0]?.message ?? "Invalid Input";
 
     return {
       ok: false,
@@ -22,23 +23,24 @@ export default async function RegisterAction(
   }
 
   try {
-    const response = await httpClient.httpPost<IRegisterRespone>(
+    await httpClient.httpPost<IRegisterRespone>(
       "auth/sign-up/email",
       parsedPayload.data,
     );
   } catch (error: unknown) {
+    // handle axios/api errors
     if (axios.isAxiosError(error)) {
       return {
         ok: false,
-        message: error.response?.data?.message || "Registration failed",
+        message: error.response?.data?.message ?? "Registration failed",
       };
     }
-
+    // handle unexpected errors
     return {
       ok: false,
       message: "Registration failed",
     };
   }
 
-  redirect("/login");
+  redirect(`/verify-otp?email=${payload.email}`);
 }

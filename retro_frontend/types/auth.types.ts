@@ -15,7 +15,7 @@ export interface ILoginResponse {
 }
 
 export interface IRegisterRespone {
-  toke: string | null;
+  token: string | null;
   user: {
     name: string;
     email: string;
@@ -29,5 +29,22 @@ export interface IRegisterRespone {
     deletedAt: string | null;
     createdAt: string;
     updatedAt: string;
+  };
+}
+
+export interface IVerifyResponse {
+  ok: true;
+  statusCode: number;
+  message: string;
+  data: {
+    status: boolean;
+    token: string;
+    user: {
+      name: string;
+      email: string;
+      emailVerified: boolean;
+      role: string;
+      isDeleted: boolean;
+    };
   };
 }

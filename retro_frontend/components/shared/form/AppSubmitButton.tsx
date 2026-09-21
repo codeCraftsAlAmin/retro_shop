@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Loader2 } from "lucide-react";
 
-type AppSubmitButtonProps = {
+type AppSubmitButtonProps =  {
   isPending: boolean;
   children: React.ReactNode;
   pendingLabel?: string;
@@ -16,12 +16,13 @@ const AppSubmitButton = ({
   pendingLabel = "Submitting...",
   className,
   disabled,
+  ...props
 }: AppSubmitButtonProps) => {
   const isDisabled = isPending || disabled;
 
   return (
     <Button
-      type="submit"
+      {...props}
       disabled={isDisabled}
       className={cn("w-full", className)}
     >

@@ -16,7 +16,7 @@ export default async function LoginAction(
   const parsedPayload = loginZodSchema.safeParse(payload);
 
   if (!parsedPayload.success) {
-    const firstError = parsedPayload.error.issues[0].message || "Invalid Input";
+    const firstError = parsedPayload.error.issues[0]?.message || "Invalid Input";
 
     return {
       ok: false,
@@ -46,14 +46,15 @@ export default async function LoginAction(
       path: "/",
       maxAge: 60 * 60 * 24,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    // handle axios/api errors
     if (axios.isAxiosError(error)) {
       return {
         ok: false,
         message: error.response?.data?.message || "Login failed",
       };
     }
-
+    // handle unexpected errors
     return {
       ok: false,
       message: "Login failed",
