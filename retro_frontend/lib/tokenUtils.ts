@@ -3,25 +3,25 @@
 import { setCookie } from "./cookieUtils";
 // ======================================follow this approach only for jwt================================ //
 
-// import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt, { JwtPayload } from "jsonwebtoken";
 
-// const getTokenSecondsRemaining = (token: string): number => {
-//   if (!token) return 0;
+const getTokenSecondsRemaining = (token: string): number => {
+  if (!token) return 0;
 
-//   try {
-//     const tokenPayload = jwt.decode(token) as JwtPayload;
+  try {
+    const tokenPayload = jwt.decode(token) as JwtPayload;
 
-//     if (tokenPayload && !tokenPayload.exp) return 0;
+    if (tokenPayload && !tokenPayload.exp) return 0;
 
-//     const remainingSeconds =
-//       (tokenPayload.exp as number) - Math.floor(Date.now() / 1000);
+    const remainingSeconds =
+      (tokenPayload.exp as number) - Math.floor(Date.now() / 1000);
 
-//     return remainingSeconds > 0 ? remainingSeconds : 0;
-//   } catch (error) {
-//     console.error("Error decoding token:", error);
-//     return 0;
-//   }
-// };
+    return remainingSeconds > 0 ? remainingSeconds : 0;
+  } catch (error) {
+    console.error("Error decoding token:", error);
+    return 0;
+  }
+};
 
 // export const setTokenInCookies = async (
 //   name: string,
@@ -43,6 +43,19 @@ export default async function setTokenInCookies(
   token: string,
   maxAge = 60 * 60 * 24,
 ) {
-  console.log("this is token from token utils ~ ✨✨🧨",token)
+  console.log("this is token from token utils ~ ✨✨🧨", token);
   await setCookie(name, token, maxAge);
+}
+
+export async function isTokenExpiringSoon(
+  token: string,
+  thresholdInSeconds = 300,
+): Promise<boolean> {
+  const remainingSeconds = getTokenSecondsRemaining(token);
+  return remainingSeconds > 0 && remainingSeconds <= thresholdInSeconds;
+}
+
+export async function isTokenExpired(token: string): Promise<boolean> {
+  const remainingSeconds = getTokenSecondsRemaining(token);
+  return remainingSeconds === 0;
 }

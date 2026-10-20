@@ -24,7 +24,6 @@ interface OtpPageProps {
 
 export default function OtpPage({ email }: OtpPageProps) {
   const [serverError, setServerError] = useState<string | null>(null);
-  const [otp, setOtp] = useState("");
 
   const { mutateAsync, isPending } = useMutation({
     mutationFn: (payload: IVerifyEmailPayload) => OtpAction(payload),
